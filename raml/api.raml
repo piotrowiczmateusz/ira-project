@@ -1,0 +1,178 @@
+#%RAML 1.0
+title: ira-api
+version: v1
+mediaType: application/json
+schemas:
+  error:           !include schemas/error.json
+  users:           !include schemas/users.json
+  user:            !include schemas/user.json
+  hotels:          !include schemas/hotels.json
+  hotel:           !include schemas/hotel.json
+  rooms:           !include schemas/rooms.json
+  room:            !include schemas/room.json
+  reservations:    !include schemas/reservations.json
+  reservation:     !include schemas/reservation.json
+
+
+/users:
+  get:
+    description: Retrieve the list of users.
+    responses:
+      200:
+        body:
+          schema: users
+      404:
+        body:
+          schema: error
+  post:
+    description: Add new user.
+    responses:
+      204:
+        description: New user was added.
+  /{userId}:
+    uriParameters:
+      userId:
+        type: string
+        required: true
+    get:
+        description: Retrieve a single user.
+        responses:
+          200:
+            body:
+              schema: user
+          404:
+            description: The user ID doesn't exist.
+            body:
+              schema: error
+    delete:
+      description: Delete an user.
+      responses:
+        204:
+          description: The user has been evicted.
+    put:
+      description: Update an user.
+      responses:
+        204:
+          description: The user has been updated.
+
+/hotels:
+  get:
+    description: Retrieve the list of hotels.
+    responses:
+      200:
+        body:
+          schema: hotels
+      404:
+        body:
+          schema: error
+  post:
+    description: Add new hotel.
+    responses:
+      204:
+        description: New hotel was added.
+  /{hotelId}:
+    uriParameters:
+      hotelId:
+        type: string
+        required: true
+    get:
+        description: Retrieve a single hotel.
+        responses:
+          200:
+            body:
+              schema: hotel
+          404:
+            description: The hotel ID doesn't exist.
+            body:
+              schema: error
+    delete:
+      description: Delete a hotel.
+      responses:
+        204:
+          description: The hotel has been evicted.
+    put:
+      description: Update a hotel.
+      responses:
+        204:
+          description: The hotel has been updated.
+    /rooms:
+      get:
+        description: Retrieve the list of hotel rooms.
+        responses:
+          200:
+            body:
+              schema: rooms
+          404:
+            body:
+              schema: error
+      post:
+        description: Add new hotel room.
+        responses:
+          204:
+            description: New room was added.
+      /{roomId}:
+        uriParameters:
+          roomId:
+            type: string
+            required: true
+        get:
+            description: Retrieve a single room.
+            responses:
+              200:
+                body:
+                  schema: room
+              404:
+                description: The room ID doesn't exist.
+                body:
+                  schema: error
+        delete:
+          description: Delete a room.
+          responses:
+            204:
+              description: The room has been evicted.
+        put:
+          description: Update a room.
+          responses:
+            204:
+              description: The room has been updated.
+
+/reservations:
+  get:
+    description: Retrieve the list of reservations.
+    responses:
+      200:
+        body:
+          schema: reservations
+      404:
+        body:
+          schema: error
+  post:
+    description: Add new reservation.
+    responses:
+      204:
+        description: New reservation was added.
+  /{reservationId}:
+    uriParameters:
+      reservationId:
+        type: string
+        required: true
+    get:
+        description: Retrieve a single reservation.
+        responses:
+          200:
+            body:
+              schema: reservation
+          404:
+            description: The reservation ID doesn't exist.
+            body:
+              schema: error
+    delete:
+      description: Delete a reservation.
+      responses:
+        204:
+          description: The reservation has been evicted.
+    put:
+      description: Update a reservation.
+      responses:
+        204:
+          description: The reservation has been updated.

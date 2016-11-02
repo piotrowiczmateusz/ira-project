@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "description": "A single reservation object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "user": {
+            "type": "string",
+            "required": false
+        },
+        "room": {
+            "type": "string",
+            "required": false
+        },
+        "reservationDate": {
+            "type": "date",
+            "required": false
+        },
+        "arrivalDate": {
+            "type": "date",
+            "required": false
+        },
+        "departureDate": {
+            "type": "date",
+            "required": false
+        },
+        "price": {
+            "type": "integer",
+            "required": false
+        }
+    }
+}

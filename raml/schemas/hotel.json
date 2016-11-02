@@ -1,0 +1,33 @@
+{
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "description": "Single hotel object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "name": {
+            "type": "string",
+            "required": false
+        },
+        "city": {
+            "type": "string",
+            "required": false
+        },
+        "address": {
+            "type": "string",
+            "required": false
+        },
+        "stars": {
+            "type": "integer",
+            "required": false
+        },
+        "rooms": {
+            "type": "array",
+            "items": {
+                "$ref": "room"
+            }
+        }
+    }
+}

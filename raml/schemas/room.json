@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "description": "A single room object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "required": true
+        },
+        "hotel": {
+            "type": "string",
+            "required": false
+        },
+        "type": {
+            "type": "string",
+            "required": false
+        },
+        "price": {
+            "type": "integer",
+            "required": false
+        },
+        "description": {
+            "type": "string",
+            "required": false
+        }
+    }
+}
