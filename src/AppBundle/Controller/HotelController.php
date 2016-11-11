@@ -38,7 +38,7 @@ class HotelController extends FOSRestController
     $data = $em->createQuery($query)->getResult();
 
     if(!$data) {
-      $data = "Hotel with id: ".$id." not found.";
+      $data = "Error 404. Hotel with id: ".$id." not found.";
     }
 
     $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -63,7 +63,7 @@ class HotelController extends FOSRestController
       $em->persist($hotel);
       $em->flush();
 
-      $data = "Hotel was added.";
+      $data = "201. Created new hotel.";
 
       $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
       return $view;
@@ -85,9 +85,9 @@ class HotelController extends FOSRestController
         $em->remove($hotel);
         $em->flush();
 
-        $data = "Hotel with id: ".$id." was deleted.";
+        $data = "204. Hotel with id: ".$id." was deleted.";
       } else {
-        $data = "Hotel with id: ".$id." not found.";
+        $data = "Error 404. Hotel with id: ".$id." not found.";
       }
 
       $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -118,9 +118,9 @@ class HotelController extends FOSRestController
 
        $em->flush();
 
-       $data = "Update hotel with id: ".$id.".";
+       $data = "204. Update hotel with id: ".$id.".";
      } else {
-       $data = "Hotel with id: ".$id." not found.";
+       $data = "Error 404. Hotel with id: ".$id." not found.";
      }
 
      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);

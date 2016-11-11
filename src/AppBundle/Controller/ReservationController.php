@@ -38,7 +38,7 @@ class ReservationController extends FOSRestController
        $data = $query->getResult();
 
        if(!$data) {
-         $data = "Reservation with id: ".$id." not found.";
+         $data = "Error 404. Reservation with id: ".$id." not found.";
        }
 
        $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -62,7 +62,7 @@ class ReservationController extends FOSRestController
       $em->persist($reservation);
       $em->flush();
 
-      $data = "Reservation was added.";
+      $data = "201. Created new reservation.";
 
       $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
       return $view;
@@ -83,9 +83,9 @@ class ReservationController extends FOSRestController
         $em->remove($Reservation);
         $em->flush();
 
-        $data = "Reservation with id: ".$id." was deleted.";
+        $data = "204. Reservation with id: ".$id." was deleted.";
       } else {
-        $data = "Reservation with id: ".$id." not found";
+        $data = "Error 404. Reservation with id: ".$id." not found";
       }
 
       $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -116,9 +116,9 @@ class ReservationController extends FOSRestController
 
        $em->flush();
 
-       $data = "Update reservation with id: ".$id.".";
+       $data = "204. Update reservation with id: ".$id.".";
      } else {
-       $data = "Reservation with id: ".$id." not found";
+       $data = "Error 404. Reservation with id: ".$id." not found";
      }
 
      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);

@@ -21,13 +21,10 @@ schemas:
       200:
         body:
           schema: users
-      404:
-        body:
-          schema: error
   post:
     description: Add new user.
     responses:
-      204:
+      201:
         description: New user was added.
   /{userId}:
     uriParameters:
@@ -62,13 +59,10 @@ schemas:
       200:
         body:
           schema: hotels
-      404:
-        body:
-          schema: error
   post:
     description: Add new hotel.
     responses:
-      204:
+      201:
         description: New hotel was added.
   /{hotelId}:
     uriParameters:
@@ -102,13 +96,10 @@ schemas:
           200:
             body:
               schema: rooms
-          404:
-            body:
-              schema: error
       post:
         description: Add new hotel room.
         responses:
-          204:
+          201:
             description: New room was added.
       /{roomId}:
         uriParameters:
@@ -143,13 +134,10 @@ schemas:
       200:
         body:
           schema: reservations
-      404:
-        body:
-          schema: error
   post:
     description: Add new reservation.
     responses:
-      204:
+      201:
         description: New reservation was added.
   /{reservationId}:
     uriParameters:
