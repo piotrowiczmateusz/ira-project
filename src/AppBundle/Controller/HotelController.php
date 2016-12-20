@@ -7,6 +7,19 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Entity\Hotel;
+use AppBundle\Entity\Error;
+
+/*
+  Sample Data:
+
+  {
+    "name": "hotel",
+    "city": "cityName",
+    "address": "street, City",
+    "stars": 5
+  }
+
+*/
 
 class HotelController extends FOSRestController
 {
@@ -19,9 +32,9 @@ class HotelController extends FOSRestController
      $em = $this->getDoctrine()->getManager();
 
      $query = "SELECT hotel.id, hotel.name, hotel.city, hotel.address, hotel.stars  FROM AppBundle:Hotel hotel";
-     $data = $em->createQuery($query)->getResult();
+     $response = $em->createQuery($query)->getResult();
 
-     $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+     $view = $this->view($response);
      return $view;
  }
 
@@ -34,14 +47,14 @@ class HotelController extends FOSRestController
 
     $em = $this->getDoctrine()->getManager();
 
-    $query =  "SELECT h FROM AppBundle:Hotel h INNER JOIN AppBundle:Room r WITH h.id = r.hotel WHERE h.id = '".$id."'";
-    $data = $em->createQuery($query)->getResult();
+    $query =  "SELECT h FROM AppBundle:Hotel h WHERE h.id = '".$id."'";
+    $response = $em->createQuery($query)->getResult();
 
-    if(!$data) {
-      $data = "Error 404. Hotel with id: ".$id." not found.";
+    if(!$response) {
+      $response = new Error("404", "Hotel with id: ".$id." not found.");
     }
 
-    $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+    $view = $this->view($response);
     return $view;
   }
 
@@ -56,16 +69,30 @@ class HotelController extends FOSRestController
 
       $body = $request->getContent();
 
-      if (!empty($body)) { $params = json_decode($body, false); }
+      if (!empty($body)) $params = json_decode($body);
 
-      $hotel = new Hotel($params->name, $params->city, $params->address, $params->stars);
+      if($params) {
 
-      $em->persist($hotel);
-      $em->flush();
+        if(isset($params->name) &&
+           isset($params->city) &&
+           isset($params->address) &&
+           isset($params->stars)) {
 
-      $data = "201. Created new hotel.";
+             $hotel = new Hotel($params->name, $params->city, $params->address, $params->stars);
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+             $em->persist($hotel);
+             $em->flush();
+
+             $response = $hotel;
+
+        } else {
+          $response = new Error("400", "Missing parameters for hotel.");
+        }
+      } else {
+        $response = new Error("400", "Invalid JSON syntax.");
+      }
+
+      $view = $this->view($response);
       return $view;
    }
 
@@ -85,12 +112,12 @@ class HotelController extends FOSRestController
         $em->remove($hotel);
         $em->flush();
 
-        $data = "204. Hotel with id: ".$id." was deleted.";
+        $response = new Error("204", "Hotel with id: ".$id." was deleted.");
       } else {
-        $data = "Error 404. Hotel with id: ".$id." not found.";
+        $response = new Error("404", "Hotel with id: ".$id." not found.");
       }
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+      $view = $this->view($response);
       return $view;
   }
 
@@ -106,24 +133,31 @@ class HotelController extends FOSRestController
 
      $body = $request->getContent();
 
-     if (!empty($body)) { $params = json_decode($body, false); }
+     if (!empty($body)) $params = json_decode($body);
 
      $hotel = $em->getRepository('AppBundle:Hotel')->findOneById($id);
 
-     if($hotel) {
-       $hotel->setName($params->name);
-       $hotel->setCity($params->city);
-       $hotel->setAddress($params->address);
-       $hotel->setStars($params->stars);
+     if($params) {
 
-       $em->flush();
+       if($hotel) {
 
-       $data = "204. Update hotel with id: ".$id.".";
+         if (isset($params->name)) $hotel->setName($params->name);
+         if (isset($params->city)) $hotel->setCity($params->city);
+         if (isset($params->address)) $hotel->setAddress($params->address);
+         if (isset($params->stars)) $hotel->setStars($params->stars);
+
+         $em->flush();
+
+         $response = new Error("204", "hotel with id: ".$id."was updated.");
+
+       } else {
+         $response = new Error("404", "Hotel with id: ".$id." not found.");
+       }
      } else {
-       $data = "Error 404. Hotel with id: ".$id." not found.";
+       $response = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+     $view = $this->view($response);
      return $view;
   }
 

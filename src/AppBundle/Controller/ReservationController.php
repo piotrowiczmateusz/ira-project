@@ -7,6 +7,19 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Entity\Reservation;
+use AppBundle\Entity\Error;
+
+/*
+  Sample Data:
+
+  {
+    "user": "userID",
+    "room": "roomID",
+    "arrivalDate": "26-04-2017",
+    "departureDate": "30-04-2017"
+  }
+
+*/
 
 class ReservationController extends FOSRestController
 {
@@ -19,9 +32,9 @@ class ReservationController extends FOSRestController
        $em = $this->getDoctrine()->getManager();
 
        $query = $em->createQuery("SELECT reservation FROM AppBundle:Reservation reservation");
-       $reservations = $query->getResult();
+       $response = $query->getResult();
 
-       $view = $this->view($reservations, Response::HTTP_INTERNAL_SERVER_ERROR);
+       $view = $this->view($response);
        return $view;
    }
 
@@ -35,13 +48,13 @@ class ReservationController extends FOSRestController
        $em = $this->getDoctrine()->getManager();
 
        $query = $em->createQuery("SELECT reservation FROM AppBundle:Reservation reservation WHERE reservation.id = '".$id."'");
-       $data = $query->getResult();
+       $response = $query->getResult();
 
-       if(!$data) {
-         $data = "Error 404. Reservation with id: ".$id." not found.";
+       if(!$response) {
+         $response = new Error("404", "Reservation with id: ".$id." not found.");
        }
 
-       $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+       $view = $this->view($response);
        return $view;
    }
 
@@ -55,16 +68,29 @@ class ReservationController extends FOSRestController
 
       $body = $request->getContent();
 
-      if (!empty($body)) { $params = json_decode($body, false); }
+      if (!empty($body)) $params = json_decode($body);
 
-      $reservation = new Reservation($params->user, $params->room, $params->arrivalDate, $params->departureDate);
+      if($params) {
 
-      $em->persist($reservation);
-      $em->flush();
+        if(isset($params->user) &&
+           isset($params->room) &&
+           isset($params->arrivalDate) &&
+           isset($params->departureDate)) {
 
-      $data = "201. Created new reservation.";
+            $reservation = new Reservation($params->user, $params->room, $params->arrivalDate, $params->departureDate);
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+            $em->persist($reservation);
+            $em->flush();
+
+            $response = $reservation;
+          } else {
+            $response = new Error("400", "Missing parameters for reservation.");
+          }
+        } else {
+          $response = new Error("400", "Invalid JSON syntax.");
+        }
+
+      $view = $this->view($response);
       return $view;
    }
 
@@ -83,12 +109,12 @@ class ReservationController extends FOSRestController
         $em->remove($Reservation);
         $em->flush();
 
-        $data = "204. Reservation with id: ".$id." was deleted.";
+        $response = new Error("204", "Reservation with id: ".$id." was deleted.");
       } else {
-        $data = "Error 404. Reservation with id: ".$id." not found";
+        $response = new Error("404", "Reservation with id: ".$id." not found");
       }
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+      $view = $this->view($response);
       return $view;
   }
 
@@ -104,24 +130,29 @@ class ReservationController extends FOSRestController
 
      $body = $request->getContent();
 
-     if (!empty($body)) { $params = json_decode($body, false); }
+     if (!empty($body)) $params = json_decode($body);
 
      $reservation = $em->getRepository('AppBundle:Reservation')->findOneById($id);
 
-     if($reservation) {
-       $reservation->setUser($params->user);
-       $reservation->setRoom($params->room);
-       $reservation->setArrivalDate($params->arrivalDate);
-       $reservation->setDepartureDate($params->departureDate);
+     if($params) {
 
-       $em->flush();
+       if($reservation) {
+         if (isset($params->user)) $reservation->setUser($params->user);
+         if (isset($params->room)) $reservation->setRoom($params->room);
+         if (isset($params->arrivalDate)) $reservation->setArrivalDate($params->arrivalDate);
+         if (isset($params->departureDate)) $reservation->setDepartureDate($params->departureDate);
 
-       $data = "204. Update reservation with id: ".$id.".";
+         $em->flush();
+
+         $response = new Error("204", "Reservation with id: ".$id."was updated.");
+       } else {
+         $response = new Error("404", "Reservation with id: ".$id." not found");
+       }
      } else {
-       $data = "Error 404. Reservation with id: ".$id." not found";
+       $response = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+     $view = $this->view($response);
      return $view;
   }
 

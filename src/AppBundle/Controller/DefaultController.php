@@ -12,11 +12,12 @@ class DefaultController extends FOSRestController
 
     /**
     * @Rest\Get("/api")
+    * @Rest\Get("/")
     */
     public function getDefault(Request $request)
     {
-      $data = "IRA API";
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+      $response = "IRA API";
+      $view = $this->view($response);
       return $view;
     }
 

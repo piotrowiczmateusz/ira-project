@@ -6,7 +6,23 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use SensioLabs\Security\Exception\RuntimeException;
 use AppBundle\Entity\User;
+use AppBundle\Entity\Error;
+
+
+/*
+  Sample Data:
+
+  {
+    "name": "user",
+    "surname": "resu",
+    "email": "user@user.pl",
+    "password": "123"
+  }
+
+*/
 
 class UserController extends FOSRestController
 {
@@ -19,9 +35,9 @@ class UserController extends FOSRestController
      $em = $this->getDoctrine()->getManager();
 
      $query = "SELECT user.id, user.name, user.surname, user.email, user.password FROM AppBundle:User user";
-     $data = $em->createQuery($query)->getResult();
+     $response = $em->createQuery($query)->getResult();
 
-     $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+     $view = $this->view($response);
      return $view;
    }
 
@@ -35,13 +51,13 @@ class UserController extends FOSRestController
       $em = $this->getDoctrine()->getManager();
 
       $query = "SELECT user FROM AppBundle:User user WHERE user.id = '".$id."'";
-      $data = $em->createQuery($query)->getResult();
+      $response = $em->createQuery($query)->getResult();
 
-      if(!$data) {
-        $data = "Error 404. User with id: ".$id." not found.";
+      if(!$response) {
+        $response = new Error("404", "User with id: ".$id." not found.");
       }
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+      $view = $this->view($response);
       return $view;
    }
 
@@ -56,16 +72,31 @@ class UserController extends FOSRestController
 
       $body = $request->getContent();
 
-      if (!empty($body)) { $params = json_decode($body, false); }
+      if (!empty($body)) $params = json_decode($body);
 
-      $user = new User($params->name, $params->surname, $params->email, $params->password);
+      if($params) {
 
-      $em->persist($user);
-      $em->flush();
+        if(isset($params->name) &&
+           isset($params->surname) &&
+           isset($params->email) &&
+           isset($params->password)) {
 
-      $data = "201 Created new user.";
+             $user = new User($params->name, $params->surname, $params->email, $params->password);
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+             $em->persist($user);
+             $em->flush();
+
+             $response = $user;
+
+          } else {
+            $response = new Error("400", "Missing parameters for user.");
+          }
+
+        } else {
+          $response = new Error("400", "Invalid JSON syntax.");
+        }
+
+      $view = $this->view($response);
       return $view;
    }
 
@@ -84,12 +115,12 @@ class UserController extends FOSRestController
         $em->remove($user);
         $em->flush();
 
-        $data = "204. User with id: ".$id." was deleted.";
+        $response = new Error("204", "User with id: ".$id." was deleted.");
       } else {
-        $data = "Error 404. User with id: ".$id." not found.";
+        $response = new Error("404", "User with id: ".$id." not found.");
       }
 
-      $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+      $view = $this->view($response);
       return $view;
   }
 
@@ -105,24 +136,29 @@ class UserController extends FOSRestController
 
      $body = $request->getContent();
 
-     if (!empty($body)) { $params = json_decode($body, false); }
+     if (!empty($body)) $params = json_decode($body);
 
      $user = $em->getRepository('AppBundle:User')->findOneById($id);
 
-     if($user) {
-       $user->setName($params->name);
-       $user->setSurname($params->surname);
-       $user->setEmail($params->email);
-       $user->setPassword($params->password);
+     if($params) {
 
-       $em->flush();
+       if($user) {
+         if (isset($params->name)) $user->setName($params->name);
+         if (isset($params->surname)) $user->setSurname($params->surname);
+         if (isset($params->email)) $user->setEmail($params->email);
+         if (isset($params->password)) $user->setPassword($params->password);
 
-       $data = "204. Update user with id: ".$id.".";
+         $em->flush();
+
+         $response = new Error("204", "User with id: ".$id."was updated.");
+       } else {
+         $response = new Error("404", "User with id: ".$id." not found.");
+       }
      } else {
-       $data = "Error 404. User with id: ".$id." not found.";
+       $response = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+     $view = $this->view($response);
      return $view;
   }
 

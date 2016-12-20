@@ -7,6 +7,18 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Entity\Room;
+use AppBundle\Entity\Error;
+
+/*
+  Sample Data:
+
+  {
+    "hotelID": "hotelID",
+    "type": "single",
+    "price": 100
+  }
+
+*/
 
 class RoomController extends FOSRestController
 {
@@ -20,9 +32,9 @@ class RoomController extends FOSRestController
        $em = $this->getDoctrine()->getManager();
 
        $query = "SELECT room.id, room.type, room.price FROM AppBundle:Room room WHERE room.hotel ='".$id."'";
-       $data = $em->createQuery($query)->getResult();
+       $response = $em->createQuery($query)->getResult();
 
-       $view = $this->view($data, Response::HTTP_INTERNAL_SERVER_ERROR);
+       $view = $this->view($response);
        return $view;
    }
 
@@ -37,9 +49,13 @@ class RoomController extends FOSRestController
       $em = $this->getDoctrine()->getManager();
 
       $query = $em->createQuery("SELECT room FROM AppBundle:Room room WHERE room.hotel = '".$hotelId."' AND room.id = '".$id."'");
-      $room = $query->getResult();
+      $response = $query->getResult();
 
-      $view = $this->view($room, Response::HTTP_INTERNAL_SERVER_ERROR);
+      if(!$response) {
+        $response = new Error("404", "Room with id: ".$id." not found.");
+      }
+
+      $view = $this->view($response);
       return $view;
    }
 
@@ -54,21 +70,31 @@ class RoomController extends FOSRestController
 
       $body = $request->getContent();
 
-      if (!empty($body)) { $params = json_decode($body, false); }
+      if (!empty($body)) $params = json_decode($body);
 
-      $hotelID = $params->hotelID;
-      $type = $params->type;
-      $price = $params->price;
+      if($params) {
 
-      $room = new Room($hotelID, $type, $price);
+        if(isset($params->hotelID) &&
+           isset($params->type) &&
+           isset($params->price)) {
 
-      $em = $this->getDoctrine()->getManager();
-      $em->persist($room);
-      $em->flush();
+            $room = new Room($params->hotelID, $params->type, $params->price);
 
-      $params = json_decode($body, true);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($room);
+            $em->flush();
 
-      $view = $this->view($params, Response::HTTP_INTERNAL_SERVER_ERROR);
+            $response = $room;
+
+        } else {
+          $response = new Error("400", "Missing parameters for room.");
+        }
+
+      } else {
+        $response = new Error("400", "Invalid JSON syntax.");
+      }
+
+      $view = $this->view($response);
       return $view;
    }
 
@@ -83,16 +109,25 @@ class RoomController extends FOSRestController
       $id = $request->get('id');
 
       $query = $em->createQuery("DELETE FROM AppBundle:Room room WHERE room.id = '".$id."'");
-      $rooms = $query->getResult();
+      $room = $query->getResult();
 
-      $view = $this->view($rooms, Response::HTTP_INTERNAL_SERVER_ERROR);
+      if($room) {
+        $em->remove($room);
+        $em->flush();
+
+        $response = new Error("204", "Room with id: ".$id." was deleted.");
+      } else {
+        $response = new Error("404", "Room with id: ".$id." not found.");
+      }
+
+      $view = $this->view($response);
       return $view;
   }
 
   /**
   * @Rest\Put("/api/rooms/{id}")
   */
-  public function updateUser(Request $request)
+  public function updateRoom(Request $request)
   {
 
      $em = $this->getDoctrine()->getManager();
@@ -101,16 +136,28 @@ class RoomController extends FOSRestController
 
      $body = $request->getContent();
 
-     if (!empty($body)) { $params = json_decode($body, false); }
+     if (!empty($body)) $params = json_decode($body);
 
-     $hotelID = $params->hotelID;
-     $type = $params->type;
-     $price = $params->price;
+     $room = $em->getRepository('AppBundle:Room')->findOneById($id);
 
-     $query = $em->createQuery("UPDATE AppBundle:Room room SET room.hotelID='".$hotelID."', room.type='".$type."', room.price='".$price."' WHERE room.id = '".$id."'");
-     $rooms = $query->getResult();
+     if($params) {
 
-     $view = $this->view($rooms, Response::HTTP_INTERNAL_SERVER_ERROR);
+       if($room) {
+         if (isset($params->hotelID)) $room->setHotelID($params->hotelID);
+         if (isset($params->type)) $room->setType($params->type);
+         if (isset($params->price)) $room->setPrice($params->price);
+
+         $em->flush();
+
+         $response = new Error("204", "Room with id: ".$id."was updated.");
+       } else {
+         $response = new Error("404", "Room with id: ".$id." not found.");
+       }
+     } else {
+       $response = new Error("400", "Invalid JSON syntax.");
+     }
+
+     $view = $this->view($response);
      return $view;
   }
 
