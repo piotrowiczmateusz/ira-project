@@ -9,11 +9,11 @@
         },
         "name": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "surname": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "email": {
             "type": "string",

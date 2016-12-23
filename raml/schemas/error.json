@@ -3,7 +3,11 @@
   "$schema": "http://json-schema.org/draft-03/schema",
   "additionalProperties": false,
   "properties": {
-    "error": {
+    "code": {
+      "type": "string",
+      "required": true
+    },
+    "message": {
       "type": "string",
       "required": true
     }

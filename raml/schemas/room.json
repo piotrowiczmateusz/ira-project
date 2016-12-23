@@ -9,19 +9,19 @@
         },
         "hotel": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "type": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "price": {
             "type": "integer",
-            "required": false
+            "required": true
         },
         "description": {
             "type": "string",
-            "required": false
+            "required": true
         }
     }
 }

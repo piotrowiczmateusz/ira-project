@@ -16,63 +16,84 @@ schemas:
 
 /users:
   get:
-    description: Retrieve the list of users.
     responses:
       200:
+        description: Retrieve the list of users.
         body:
           schema: users
   post:
-    description: Add new user.
     responses:
       201:
         description: New user was added.
+        body:
+          schema: user
+      400:
+        description: Synax error in JSON.
+        body:
+          schema: error
   /{userId}:
     uriParameters:
       userId:
         type: string
         required: true
     get:
-        description: Retrieve a single user.
-        responses:
-          200:
-            body:
-              schema: user
-          404:
-            description: The user ID doesn't exist.
-            body:
-              schema: error
+      responses:
+        200:
+          description: Retrieve a single user.
+          body:
+            schema: user
+        404:
+          description: The user ID doesn't exist.
+          body:
+            schema: error
     delete:
-      description: Delete an user.
       responses:
         204:
           description: The user has been evicted.
+        404:
+          description: The user ID doesn't exist.
+          body:
+            schema: error
     put:
-      description: Update an user.
       responses:
         204:
           description: The user has been updated.
-
+          body:
+            schema: user
+        400:
+          description: Synax error in JSON.
+          body:
+            schema: error
+        404:
+          description: The user ID doesn't exist.
+          body:
+            schema: error
 /hotels:
   get:
-    description: Retrieve the list of hotels.
     responses:
       200:
+        description: Retrieve the list of hotels.
         body:
           schema: hotels
   post:
-    description: Add new hotel.
     responses:
       201:
         description: New hotel was added.
+        body:
+          schema: hotel
+      400:
+        description: Synax error in JSON.
+        body:
+          schema: error
   /{hotelId}:
     uriParameters:
       hotelId:
         type: string
         required: true
     get:
-        description: Retrieve a single hotel.
         responses:
           200:
+            description: Retrieve a single hotel.
             body:
               schema: hotel
           404:
@@ -80,36 +101,53 @@ schemas:
             body:
               schema: error
     delete:
-      description: Delete a hotel.
       responses:
         204:
           description: The hotel has been evicted.
+        404:
+          description: The hotel ID doesn't exist.
+          body:
+            schema: error
     put:
-      description: Update a hotel.
       responses:
         204:
           description: The hotel has been updated.
+          body:
+            schema: hotel
+        400:
+          description: Synax error in JSON.
+          body:
+            schema: error
+        404:
+          description: The hotel ID doesn't exist.
+          body:
+            schema: error
     /rooms:
       get:
-        description: Retrieve the list of hotel rooms.
         responses:
           200:
+            description: Retrieve the list of hotel rooms.
             body:
               schema: rooms
       post:
-        description: Add new hotel room.
         responses:
           201:
             description: New room was added.
+            body:
+              schema: room
+          404:
+            description: The hotel ID doesn't exist.
+            body:
+              schema: error
       /{roomId}:
         uriParameters:
           roomId:
             type: string
             required: true
         get:
-            description: Retrieve a single room.
             responses:
               200:
+                description: Retrieve a single room.
                 body:
                   schema: room
               404:
@@ -117,37 +155,53 @@ schemas:
                 body:
                   schema: error
         delete:
-          description: Delete a room.
           responses:
             204:
               description: The room has been evicted.
+            404:
+              description: The room ID doesn't exist.
+              body:
+                schema: error
         put:
-          description: Update a room.
           responses:
             204:
               description: The room has been updated.
-
+              body:
+                schema: room
+            400:
+              description: Synax error in JSON.
+              body:
+                schema: error
+            404:
+              description: The room ID doesn't exist.
+              body:
+                schema: error
 /reservations:
   get:
-    description: Retrieve the list of reservations.
     responses:
       200:
+        description: Retrieve the list of reservations.
         body:
           schema: reservations
   post:
-    description: Add new reservation.
     responses:
       201:
         description: New reservation was added.
+        body:
+          schema: reservation
+      404:
+        description: The reservation ID doesn't exist.
+        body:
+          schema: error
   /{reservationId}:
     uriParameters:
       reservationId:
         type: string
         required: true
     get:
-        description: Retrieve a single reservation.
         responses:
           200:
+            description: Retrieve a single reservation.
             body:
               schema: reservation
           404:
@@ -155,12 +209,24 @@ schemas:
             body:
               schema: error
     delete:
-      description: Delete a reservation.
       responses:
         204:
           description: The reservation has been evicted.
+        404:
+          description: The reservation ID doesn't exist.
+          body:
+            schema: error
     put:
-      description: Update a reservation.
       responses:
         204:
           description: The reservation has been updated.
+          body:
+            schema: reservation
+        400:
+          description: Synax error in JSON.
+          body:
+            schema: error
+        404:
+          description: The reservation ID doesn't exist.
+          body:
+            schema: error

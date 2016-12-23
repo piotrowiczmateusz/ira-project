@@ -9,22 +9,23 @@
         },
         "name": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "city": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "address": {
             "type": "string",
-            "required": false
+            "required": true
         },
         "stars": {
             "type": "integer",
-            "required": false
+            "required": true
         },
         "rooms": {
             "type": "array",
+            "required": false,
             "items": {
                 "$ref": "room"
             }
