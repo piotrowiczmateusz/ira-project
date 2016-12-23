@@ -4,6 +4,9 @@ namespace AppBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Entity\Hotel;
@@ -29,13 +32,16 @@ class HotelController extends FOSRestController
   */
  public function getHotels(Request $request)
  {
+     $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+     $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
      $query = "SELECT hotel.id, hotel.name, hotel.city, hotel.address, hotel.stars  FROM AppBundle:Hotel hotel";
-     $response = $em->createQuery($query)->getResult();
+     $content = $em->createQuery($query)->getResult();
 
-     $view = $this->view($response);
-     return $view;
+     $response->setContent($serializer->serialize($content, 'json'));
+     return $response;
+
  }
 
  /**
@@ -43,19 +49,24 @@ class HotelController extends FOSRestController
  */
  public function getHotelById(Request $request)
  {
-    $id = $request->get('id');
-
+    $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+    $response = new Response();
     $em = $this->getDoctrine()->getManager();
 
-    $query =  "SELECT h FROM AppBundle:Hotel h WHERE h.id = '".$id."'";
-    $response = $em->createQuery($query)->getResult();
+    $id = $request->get('id');
 
-    if(!$response) {
-      $response = new Error("404", "Hotel with id: ".$id." not found.");
+    $query =  "SELECT h FROM AppBundle:Hotel h WHERE h.id = '".$id."'";
+    $content = $em->createQuery($query)->getResult();
+
+    if(!$content) {
+      $response->setStatusCode(404);
+      $content = new Error("404", "Hotel with id: ".$id." not found.");
     }
 
-    $view = $this->view($response);
-    return $view;
+    $response->setContent($serializer->serialize($content, 'json'));
+    return $response;
+
+
   }
 
 
@@ -64,7 +75,8 @@ class HotelController extends FOSRestController
    */
    public function postHotels(Request $request)
    {
-
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $body = $request->getContent();
@@ -83,17 +95,21 @@ class HotelController extends FOSRestController
              $em->persist($hotel);
              $em->flush();
 
-             $response = $hotel;
+             $content = $hotel;
 
         } else {
-          $response = new Error("400", "Missing parameters for hotel.");
+          $response->setStatusCode(400);
+          $content = new Error("400", "Missing parameters for hotel.");
         }
       } else {
-        $response = new Error("400", "Invalid JSON syntax.");
+        $response->setStatusCode(400);
+        $content = new Error("400", "Invalid JSON syntax.");
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
+
+
    }
 
    /**
@@ -101,7 +117,8 @@ class HotelController extends FOSRestController
    */
   public function deleteHotel(Request $request)
   {
-
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $id = $request->get('id');
@@ -112,13 +129,16 @@ class HotelController extends FOSRestController
         $em->remove($hotel);
         $em->flush();
 
-        $response = new Error("204", "Hotel with id: ".$id." was deleted.");
+        $response->setStatusCode(204);
+        $content = new Error("204", "Hotel with id: ".$id." was deleted.");
       } else {
-        $response = new Error("404", "Hotel with id: ".$id." not found.");
+        $response->setStatusCode(404);
+        $content = new Error("404", "Hotel with id: ".$id." not found.");
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
+
   }
 
   /**
@@ -126,7 +146,8 @@ class HotelController extends FOSRestController
   */
   public function updateHotel(Request $request)
   {
-
+     $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+     $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
      $id = $request->get('id');
@@ -148,17 +169,21 @@ class HotelController extends FOSRestController
 
          $em->flush();
 
-         $response = new Error("204", "hotel with id: ".$id."was updated.");
+         $response->setStatusCode(204);
+         $content = new Error("204", "hotel with id: ".$id."was updated.");
 
        } else {
-         $response = new Error("404", "Hotel with id: ".$id." not found.");
+         $response->setStatusCode(404);
+         $content = new Error("404", "Hotel with id: ".$id." not found.");
        }
      } else {
-       $response = new Error("400", "Invalid JSON syntax.");
+       $response->setStatusCode(400);
+       $content = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($response);
-     return $view;
+     $response->setContent($serializer->serialize($content, 'json'));
+     return $response;
+
   }
 
 }

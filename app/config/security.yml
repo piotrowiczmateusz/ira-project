@@ -21,12 +21,13 @@ security:
         # require ROLE_ADMIN for /admin*
 
         - { path: ^/api/hotels, roles: ROLE_USER }
-        - { path: ^/api/users/, roles: ROLE_ADMIN }
+        - { path: ^/api/users, roles: ROLE_ADMIN }
 
     firewalls:
         default:
             anonymous: ~
             http_basic: ~
+            entry_point: custom_basic_authentication_entry_point
         # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/

@@ -4,6 +4,9 @@ namespace AppBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Entity\Reservation;
@@ -29,13 +32,16 @@ class ReservationController extends FOSRestController
    */
    public function getReservations(Request $request)
    {
+       $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+       $response = new Response();
        $em = $this->getDoctrine()->getManager();
 
        $query = $em->createQuery("SELECT reservation FROM AppBundle:Reservation reservation");
-       $response = $query->getResult();
+       $content = $query->getResult();
 
-       $view = $this->view($response);
-       return $view;
+       $response->setContent($serializer->serialize($content, 'json'));
+       return $response;
+
    }
 
     /**
@@ -43,19 +49,23 @@ class ReservationController extends FOSRestController
     */
    public function getReservationById(Request $request)
    {
-       $id = $request->get('id');
-
+       $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+       $response = new Response();
        $em = $this->getDoctrine()->getManager();
 
-       $query = $em->createQuery("SELECT reservation FROM AppBundle:Reservation reservation WHERE reservation.id = '".$id."'");
-       $response = $query->getResult();
+       $id = $request->get('id');
 
-       if(!$response) {
-         $response = new Error("404", "Reservation with id: ".$id." not found.");
+       $query = $em->createQuery("SELECT reservation FROM AppBundle:Reservation reservation WHERE reservation.id = '".$id."'");
+       $content = $query->getResult();
+
+       if(!$content) {
+         $response->setStatusCode(404);
+         $content = new Error("404", "Reservation with id: ".$id." not found.");
        }
 
-       $view = $this->view($response);
-       return $view;
+       $response->setContent($serializer->serialize($content, 'json'));
+       return $response;
+
    }
 
    /**
@@ -64,6 +74,8 @@ class ReservationController extends FOSRestController
    public function postReservations(Request $request)
    {
 
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $body = $request->getContent();
@@ -82,16 +94,19 @@ class ReservationController extends FOSRestController
             $em->persist($reservation);
             $em->flush();
 
-            $response = $reservation;
+            $content = $reservation;
           } else {
-            $response = new Error("400", "Missing parameters for reservation.");
+            $response->setStatusCode(400);
+            $content = new Error("400", "Missing parameters for reservation.");
           }
         } else {
-          $response = new Error("400", "Invalid JSON syntax.");
+          $response->setStatusCode(400);
+          $content = new Error("400", "Invalid JSON syntax.");
         }
 
-      $view = $this->view($response);
-      return $view;
+        $response->setContent($serializer->serialize($content, 'json'));
+        return $response;
+
    }
 
   /**
@@ -99,6 +114,9 @@ class ReservationController extends FOSRestController
   */
   public function deleteReservation(Request $request)
   {
+
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $id = $request->get('id');
@@ -109,13 +127,16 @@ class ReservationController extends FOSRestController
         $em->remove($Reservation);
         $em->flush();
 
-        $response = new Error("204", "Reservation with id: ".$id." was deleted.");
+        $response->setStatusCode(204);
+        $content = new Error("204", "Reservation with id: ".$id." was deleted.");
       } else {
-        $response = new Error("404", "Reservation with id: ".$id." not found");
+        $response->setStatusCode(404);
+        $content = new Error("404", "Reservation with id: ".$id." not found");
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
+
   }
 
   /**
@@ -124,6 +145,8 @@ class ReservationController extends FOSRestController
   public function updateReservation(Request $request)
   {
 
+     $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+     $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
      $id = $request->get('id');
@@ -144,16 +167,20 @@ class ReservationController extends FOSRestController
 
          $em->flush();
 
-         $response = new Error("204", "Reservation with id: ".$id."was updated.");
+         $response->setStatusCode(204);
+         $content = new Error("204", "Reservation with id: ".$id."was updated.");
        } else {
-         $response = new Error("404", "Reservation with id: ".$id." not found");
+         $response->setStatusCode(404);
+         $content = new Error("404", "Reservation with id: ".$id." not found");
        }
      } else {
-       $response = new Error("400", "Invalid JSON syntax.");
+       $response->setStatusCode(400);
+       $content = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($response);
-     return $view;
+     $response->setContent($serializer->serialize($content, 'json'));
+     return $response;
+
   }
 
 }

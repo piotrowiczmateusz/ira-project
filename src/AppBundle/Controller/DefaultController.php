@@ -4,6 +4,9 @@ namespace AppBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,9 +19,12 @@ class DefaultController extends FOSRestController
     */
     public function getDefault(Request $request)
     {
-      $response = "IRA API";
-      $view = $this->view($response);
-      return $view;
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
+      
+      $content = "IRA API";
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
     }
 
 }

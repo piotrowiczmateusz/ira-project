@@ -4,13 +4,15 @@ namespace AppBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use SensioLabs\Security\Exception\RuntimeException;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Error;
-
 
 /*
   Sample Data:
@@ -32,13 +34,15 @@ class UserController extends FOSRestController
   */
   public function getUsers(Request $request)
   {
+     $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+     $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
      $query = "SELECT user.id, user.name, user.surname, user.email, user.password FROM AppBundle:User user";
-     $response = $em->createQuery($query)->getResult();
+     $content = $em->createQuery($query)->getResult();
 
-     $view = $this->view($response);
-     return $view;
+     $response->setContent($serializer->serialize($content, 'json'));
+     return $response;
    }
 
    /**
@@ -46,19 +50,22 @@ class UserController extends FOSRestController
    */
    public function getUserById(Request $request)
    {
-      $id = $request->get('id');
-
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
-      $query = "SELECT user FROM AppBundle:User user WHERE user.id = '".$id."'";
-      $response = $em->createQuery($query)->getResult();
+      $id = $request->get('id');
 
-      if(!$response) {
-        $response = new Error("404", "User with id: ".$id." not found.");
+      $query = "SELECT user FROM AppBundle:User user WHERE user.id = '".$id."'";
+      $content = $em->createQuery($query)->getResult();
+
+      if(!$content) {
+        $content = new Error('404', 'User with id: '.$id.' not found.');
+        $response->setStatusCode(404);
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
    }
 
 
@@ -68,6 +75,8 @@ class UserController extends FOSRestController
    public function postUsers(Request $request)
    {
 
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $body = $request->getContent();
@@ -86,18 +95,21 @@ class UserController extends FOSRestController
              $em->persist($user);
              $em->flush();
 
-             $response = $user;
+             $content = $user;
 
           } else {
-            $response = new Error("400", "Missing parameters for user.");
+            $response->setStatusCode(400);
+            $content = new Error("400", "Missing parameters for user.");
           }
 
         } else {
-          $response = new Error("400", "Invalid JSON syntax.");
+          $response->setStatusCode(400);
+          $content = new Error("400", "Invalid JSON syntax.");
         }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
+
    }
 
    /**
@@ -105,6 +117,8 @@ class UserController extends FOSRestController
    */
   public function deleteUser(Request $request)
   {
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $id = $request->get('id');
@@ -115,13 +129,16 @@ class UserController extends FOSRestController
         $em->remove($user);
         $em->flush();
 
-        $response = new Error("204", "User with id: ".$id." was deleted.");
+        $response->setStatusCode(204);
+        $content = new Error("204", "User with id: ".$id." was deleted.");
       } else {
-        $response = new Error("404", "User with id: ".$id." not found.");
+        $response->setStatusCode(404);
+        $content = new Error("404", "User with id: ".$id." not found.");
       }
 
-      $view = $this->view($response);
-      return $view;
+    $response->setContent($serializer->serialize($content, 'json'));
+    return $response;
+
   }
 
   /**
@@ -130,6 +147,8 @@ class UserController extends FOSRestController
   public function updateUser(Request $request)
   {
 
+     $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+     $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
      $id = $request->get('id');
@@ -150,16 +169,20 @@ class UserController extends FOSRestController
 
          $em->flush();
 
-         $response = new Error("204", "User with id: ".$id."was updated.");
+         $response->setStatusCode(204);
+         $content = new Error("204", "User with id: ".$id."was updated.");
        } else {
-         $response = new Error("404", "User with id: ".$id." not found.");
+         $response->setStatusCode(404);
+         $content = new Error("404", "User with id: ".$id." not found.");
        }
      } else {
-       $response = new Error("400", "Invalid JSON syntax.");
+       $response->setStatusCode(400);
+       $content = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($response);
-     return $view;
+    $response->setContent($serializer->serialize($content, 'json'));
+    return $response;
+
   }
 
 }

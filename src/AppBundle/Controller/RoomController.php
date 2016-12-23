@@ -4,6 +4,9 @@ namespace AppBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Entity\Room;
@@ -28,14 +31,17 @@ class RoomController extends FOSRestController
    */
    public function getRooms(Request $request)
    {
-       $id = $request->get('hotelId');
+       $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+       $response = new Response();
        $em = $this->getDoctrine()->getManager();
 
-       $query = "SELECT room.id, room.type, room.price FROM AppBundle:Room room WHERE room.hotel ='".$id."'";
-       $response = $em->createQuery($query)->getResult();
+       $id = $request->get('hotelId');
 
-       $view = $this->view($response);
-       return $view;
+       $query = "SELECT room.id, room.type, room.price FROM AppBundle:Room room WHERE room.hotel ='".$id."'";
+       $content = $em->createQuery($query)->getResult();
+
+       $response->setContent($serializer->serialize($content, 'json'));
+       return $response;
    }
 
    /**
@@ -43,20 +49,23 @@ class RoomController extends FOSRestController
    */
    public function getRoomById(Request $request)
    {
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
+      $em = $this->getDoctrine()->getManager();
+
       $hotelId = $request->get('hotelId');
       $id = $request->get('id');
 
-      $em = $this->getDoctrine()->getManager();
-
       $query = $em->createQuery("SELECT room FROM AppBundle:Room room WHERE room.hotel = '".$hotelId."' AND room.id = '".$id."'");
-      $response = $query->getResult();
+      $content = $query->getResult();
 
-      if(!$response) {
-        $response = new Error("404", "Room with id: ".$id." not found.");
+      if(!$content) {
+        $response->setStatusCode(404);
+        $content = new Error("404", "Room with id: ".$id." not found.");
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
    }
 
 
@@ -65,7 +74,8 @@ class RoomController extends FOSRestController
    */
    public function postRooms(Request $request)
    {
-
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $body = $request->getContent();
@@ -84,18 +94,20 @@ class RoomController extends FOSRestController
             $em->persist($room);
             $em->flush();
 
-            $response = $room;
+            $content = $room;
 
         } else {
-          $response = new Error("400", "Missing parameters for room.");
+          $response->setStatusCode(400);
+          $content = new Error("400", "Missing parameters for room.");
         }
 
       } else {
-        $response = new Error("400", "Invalid JSON syntax.");
+        $response->setStatusCode(400);
+        $content = new Error("400", "Invalid JSON syntax.");
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
    }
 
    /**
@@ -103,7 +115,8 @@ class RoomController extends FOSRestController
    */
   public function deleteRoom(Request $request)
   {
-
+      $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+      $response = new Response();
       $em = $this->getDoctrine()->getManager();
 
       $id = $request->get('id');
@@ -115,13 +128,15 @@ class RoomController extends FOSRestController
         $em->remove($room);
         $em->flush();
 
-        $response = new Error("204", "Room with id: ".$id." was deleted.");
+        $response->setStatusCode(204);
+        $content = new Error("204", "Room with id: ".$id." was deleted.");
       } else {
-        $response = new Error("404", "Room with id: ".$id." not found.");
+        $response->setStatusCode(404);
+        $content = new Error("404", "Room with id: ".$id." not found.");
       }
 
-      $view = $this->view($response);
-      return $view;
+      $response->setContent($serializer->serialize($content, 'json'));
+      return $response;
   }
 
   /**
@@ -129,7 +144,8 @@ class RoomController extends FOSRestController
   */
   public function updateRoom(Request $request)
   {
-
+     $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+     $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
      $id = $request->get('id');
@@ -149,16 +165,19 @@ class RoomController extends FOSRestController
 
          $em->flush();
 
-         $response = new Error("204", "Room with id: ".$id."was updated.");
+         $response->setStatusCode(204);
+         $content = new Error("204", "Room with id: ".$id."was updated.");
        } else {
-         $response = new Error("404", "Room with id: ".$id." not found.");
+         $response->setStatusCode(404);
+         $content = new Error("404", "Room with id: ".$id." not found.");
        }
      } else {
-       $response = new Error("400", "Invalid JSON syntax.");
+       $response->setStatusCode(400);
+       $content = new Error("400", "Invalid JSON syntax.");
      }
 
-     $view = $this->view($response);
-     return $view;
+     $response->setContent($serializer->serialize($content, 'json'));
+     return $response;
   }
 
 }

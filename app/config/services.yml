@@ -4,7 +4,9 @@ parameters:
 #    parameter_name: value
 
 services:
-
+  custom_basic_authentication_entry_point:
+      class: AppBundle\Helper\CustomBasicAuthenticationEntryPoint
+      arguments: [ main ]
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
