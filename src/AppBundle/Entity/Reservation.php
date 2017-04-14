@@ -20,27 +20,27 @@ class Reservation
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="reservations")
+     * @ORM\Column(type="string")
      */
     private $user;
 
     /**
-     * @ORM\OneToOne(targetEntity="Room")
+     * @ORM\Column(type="string")
      */
     private $room;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="string")
      */
     private $reservationDate;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="string")
      */
     private $arrivalDate;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="string")
      */
     private $departureDate;
 
@@ -54,7 +54,7 @@ class Reservation
       $this->setUser($user);
       $this->setRoom($room);
       $time = new \DateTime();
-      $this->setReservationDate($time->format('H:i:s \O\n Y-m-d'));
+      $this->setReservationDate($time->format('d-m-Y'));
       $this->setArrivalDate($arrivalDate);
       $this->setDepartureDate($departureDate);
       $this->setPrice($price);
@@ -73,7 +73,7 @@ class Reservation
     /**
      * Set reservationDate
      *
-     * @param \DateTime $reservationDate
+     * @param string $reservationDate
      *
      * @return Reservation
      */
@@ -87,7 +87,7 @@ class Reservation
     /**
      * Get reservationDate
      *
-     * @return \DateTime
+     * @return string
      */
     public function getReservationDate()
     {
@@ -97,7 +97,7 @@ class Reservation
     /**
      * Set arrivalDate
      *
-     * @param \DateTime $arrivalDate
+     * @param string $arrivalDate
      *
      * @return Reservation
      */
@@ -111,7 +111,7 @@ class Reservation
     /**
      * Get arrivalDate
      *
-     * @return \DateTime
+     * @return string
      */
     public function getArrivalDate()
     {
@@ -121,7 +121,7 @@ class Reservation
     /**
      * Set departureDate
      *
-     * @param \DateTime $departureDate
+     * @param string $departureDate
      *
      * @return Reservation
      */
@@ -135,7 +135,7 @@ class Reservation
     /**
      * Get departureDate
      *
-     * @return \DateTime
+     * @return string
      */
     public function getDepartureDate()
     {
@@ -169,11 +169,11 @@ class Reservation
     /**
      * Set user
      *
-     * @param \AppBundle\Entity\User $user
+     * @param string $user
      *
      * @return Reservation
      */
-    public function setUser(\AppBundle\Entity\User $user = null)
+    public function setUser($user)
     {
         $this->user = $user;
 
@@ -183,7 +183,7 @@ class Reservation
     /**
      * Get user
      *
-     * @return \AppBundle\Entity\User
+     * @return string
      */
     public function getUser()
     {
@@ -193,11 +193,11 @@ class Reservation
     /**
      * Set room
      *
-     * @param \AppBundle\Entity\Room $room
+     * @param string $room
      *
      * @return Reservation
      */
-    public function setRoom(\AppBundle\Entity\Room $room = null)
+    public function setRoom($room)
     {
         $this->room = $room;
 

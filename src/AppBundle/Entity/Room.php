@@ -19,7 +19,7 @@ class Room
     private $id;
 
     /**
-    * @ORM\ManyToOne(targetEntity="Hotel", inversedBy="rooms")
+    * @ORM\Column(type="string")
     */
     private $hotel;
 
@@ -132,17 +132,16 @@ class Room
     /**
      * Set hotel
      *
-     * @param \AppBundle\Entity\Hotel $hotel
+     * @param string $hotel
      *
      * @return Room
      */
-    public function setHotel(\AppBundle\Entity\Hotel $hotel = null)
+    public function setHotel($hotel)
     {
         $this->hotel = $hotel;
 
         return $this;
     }
-
     /**
      * Get hotel
      *

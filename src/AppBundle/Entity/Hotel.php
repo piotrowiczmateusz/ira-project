@@ -24,6 +24,16 @@ class Hotel
     private $name;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $description;
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    private $country;
+
+    /**
      * @ORM\Column(type="string", length=100)
      */
     private $city;
@@ -39,16 +49,25 @@ class Hotel
     private $stars;
 
     /**
-     * @ORM\OneToMany(targetEntity="Room", mappedBy="hotel", cascade={"ALL"}, indexBy="hotel")
-     */
+    * @ORM\Column(type="string")
+    */
     private $rooms;
 
+    /**
+    * @ORM\Column(type="string")
+    */
+    private $image;
 
-    public function __construct($name, $city, $address, $stars) {
+
+    public function __construct($name, $description, $country, $city, $address, $stars) {
       $this->setName($name);
+      $this->setDescription($description);
+      $this->setCountry($country);
       $this->setCity($city);
       $this->setAddress($address);
       $this->setStars($stars);
+      $this->setRooms("");
+      $this->setImage($name);
     }
 
     /**
@@ -83,6 +102,54 @@ class Hotel
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Hotel
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set country
+     *
+     * @param string $country
+     *
+     * @return Hotel
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country
+     *
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
     }
 
     /**
@@ -158,27 +225,17 @@ class Hotel
     }
 
     /**
-     * Add room
+     * Set rooms
      *
-     * @param \AppBundle\Entity\Room $room
+     * @param String $rooms
      *
      * @return Hotel
      */
-    public function addRoom(\AppBundle\Entity\Room $room)
+    public function setRooms($rooms)
     {
-        $this->rooms[] = $room;
+        $this->rooms = $rooms;
 
         return $this;
-    }
-
-    /**
-     * Remove room
-     *
-     * @param \AppBundle\Entity\Room $room
-     */
-    public function removeRoom(\AppBundle\Entity\Room $room)
-    {
-        $this->rooms->removeElement($room);
     }
 
     /**
@@ -189,5 +246,29 @@ class Hotel
     public function getRooms()
     {
         return $this->rooms;
+    }
+
+    /**
+     * Set image
+     *
+     * @param String $image
+     *
+     * @return Hotel
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    /**
+     * Get image
+     *
+     * @return String
+     */
+    public function getImage()
+    {
+        return $this->image;
     }
 }

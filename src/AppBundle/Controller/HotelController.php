@@ -36,10 +36,10 @@ class HotelController extends FOSRestController
      $response = new Response();
      $em = $this->getDoctrine()->getManager();
 
-     $query = "SELECT hotel.id, hotel.name, hotel.city, hotel.address, hotel.stars  FROM AppBundle:Hotel hotel";
+     $query = "SELECT hotel.id, hotel.name, hotel.description, hotel.country, hotel.city, hotel.address, hotel.stars  FROM AppBundle:Hotel hotel";
      $content = $em->createQuery($query)->getResult();
 
-     $response->setContent($serializer->serialize($content, 'json'));
+     $response->setContent($serializer->serialize(array('hotels' => $content), 'json'));
      return $response;
 
  }
@@ -63,7 +63,7 @@ class HotelController extends FOSRestController
       $content = new Error("404", "Hotel with id: ".$id." not found.");
     }
 
-    $response->setContent($serializer->serialize($content, 'json'));
+    $response->setContent($serializer->serialize(array("hotel" => $content), 'json'));
     return $response;
 
 
@@ -86,11 +86,13 @@ class HotelController extends FOSRestController
       if($params) {
 
         if(isset($params->name) &&
+           isset($params->description) &&
+           isset($params->country) &&
            isset($params->city) &&
            isset($params->address) &&
            isset($params->stars)) {
 
-             $hotel = new Hotel($params->name, $params->city, $params->address, $params->stars);
+             $hotel = new Hotel($params->name, $params->description, $params->country, $params->city, $params->address, $params->stars);
 
              $em->persist($hotel);
              $em->flush();

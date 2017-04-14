@@ -41,7 +41,7 @@ class UserController extends FOSRestController
      $query = "SELECT user.id, user.name, user.surname, user.email, user.password FROM AppBundle:User user";
      $content = $em->createQuery($query)->getResult();
 
-     $response->setContent($serializer->serialize($content, 'json'));
+     $response->setContent($serializer->serialize(array('users' => $content), 'json'));
      return $response;
    }
 
@@ -64,7 +64,7 @@ class UserController extends FOSRestController
         $response->setStatusCode(404);
       }
 
-      $response->setContent($serializer->serialize($content, 'json'));
+      $response->setContent($serializer->serialize(array('user' => $content), 'json'));
       return $response;
    }
 

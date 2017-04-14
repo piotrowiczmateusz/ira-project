@@ -39,7 +39,7 @@ class ReservationController extends FOSRestController
        $query = $em->createQuery("SELECT reservation FROM AppBundle:Reservation reservation");
        $content = $query->getResult();
 
-       $response->setContent($serializer->serialize($content, 'json'));
+       $response->setContent($serializer->serialize(array('reservations' => $content), 'json'));
        return $response;
 
    }
@@ -63,7 +63,7 @@ class ReservationController extends FOSRestController
          $content = new Error("404", "Reservation with id: ".$id." not found.");
        }
 
-       $response->setContent($serializer->serialize($content, 'json'));
+       $response->setContent($serializer->serialize(array('reservation' => $content), 'json'));
        return $response;
 
    }
@@ -84,12 +84,13 @@ class ReservationController extends FOSRestController
 
       if($params) {
 
-        if(isset($params->user) &&
-           isset($params->room) &&
+        if(isset($params->userID) &&
+           isset($params->roomID) &&
            isset($params->arrivalDate) &&
-           isset($params->departureDate)) {
+           isset($params->departureDate) &&
+           isset($params->price)) {
 
-            $reservation = new Reservation($params->user, $params->room, $params->arrivalDate, $params->departureDate);
+            $reservation = new Reservation($params->userID, $params->roomID, $params->arrivalDate, $params->departureDate, $params->price);
 
             $em->persist($reservation);
             $em->flush();

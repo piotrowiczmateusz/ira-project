@@ -40,7 +40,7 @@ class RoomController extends FOSRestController
        $query = "SELECT room.id, room.type, room.price FROM AppBundle:Room room WHERE room.hotel ='".$id."'";
        $content = $em->createQuery($query)->getResult();
 
-       $response->setContent($serializer->serialize($content, 'json'));
+       $response->setContent($serializer->serialize(array('rooms' => $content), 'json'));
        return $response;
    }
 
@@ -64,13 +64,13 @@ class RoomController extends FOSRestController
         $content = new Error("404", "Room with id: ".$id." not found.");
       }
 
-      $response->setContent($serializer->serialize($content, 'json'));
+      $response->setContent($serializer->serialize(array('room' => $content), 'json'));
       return $response;
    }
 
 
    /**
-   * @Rest\Post("/api/rooms")
+   * @Rest\Post("/api/hotels/{hotelId}/rooms")
    */
    public function postRooms(Request $request)
    {
@@ -84,14 +84,26 @@ class RoomController extends FOSRestController
 
       if($params) {
 
-        if(isset($params->hotelID) &&
+        if(
            isset($params->type) &&
-           isset($params->price)) {
+           isset($params->price) &&
+           isset($params->description)) {
 
-            $room = new Room($params->hotelID, $params->type, $params->price);
+            $hotel = $em->getRepository('AppBundle:Hotel')->findOneById($request->get('hotelId'));
+            if($hotel->getRooms() != null) {
+              $hotelRooms = json_decode($hotel->getRooms());
+            } else {
+                $hotelRooms = array();
+            }
+
+            $room = new Room($hotel->getId(), $params->type, $params->price, $params->description);
+
+            array_push($hotelRooms, $room);
+            $hotel->setRooms(json_encode($hotelRooms));
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($room);
+            $em->persist($hotel);
             $em->flush();
 
             $content = $room;
