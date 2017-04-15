@@ -185,4 +185,36 @@ class UserController extends FOSRestController
 
   }
 
+  /**
+  * @Rest\POST("/api/login")
+  */
+  public function login(Request $request)
+  {
+    $em = $this->getDoctrine()->getManager();
+
+    $body = $request->getContent();
+
+    if (!empty($body)) { $params = json_decode($body, false); }
+
+    $findUser = $em->getRepository('AppBundle:User')->findOneBy(array('email' => $params->email));
+
+    if($findUser) {
+
+        if($findUser->getPassword() == $params->password) {
+          $response = array("user" => array(
+        		"id" => $findUser->getId(),
+            "name" => $findUser->getName(),
+            "surname" => $findUser->getSurname(),
+            "email" => $findUser->getEmail(),
+            "password" => $findUser->getPassword()
+          ));
+        }
+        else { $response = array("response" => array("code" => "400","message" => "Niepoprawne hasło.".$password."\n".$findUser->getPassword())); }
+    }
+    else { $response = array("response" => array("code" => "404","message" => "Nie znaleziono użytkownika.")); }
+
+    $view = $this->view($response);
+    return $view;
+  }
+
 }

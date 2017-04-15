@@ -37,7 +37,7 @@ class RoomController extends FOSRestController
 
        $id = $request->get('hotelId');
 
-       $query = "SELECT room.id, room.type, room.price FROM AppBundle:Room room WHERE room.hotel ='".$id."'";
+       $query = "SELECT room.id, room.type, room.description, room.price FROM AppBundle:Room room WHERE room.hotel ='".$id."'";
        $content = $em->createQuery($query)->getResult();
 
        $response->setContent($serializer->serialize(array('rooms' => $content), 'json'));
